@@ -36,10 +36,21 @@ if (module === require.main) {
 
   const PORT = 1337
 
-  const db = require('../db')
-  db.sync()
-  .then(() => {
-    console.log('db synced')
-    app.listen(PORT, () => console.log(`server listening on port ${PORT}`))
+	const db = require('../db')
+	const {campus, student} = db.models
+  db.sync({force : true})
+		.then(() => {
+			Promise.all([
+				campus.create({name : 'Carnie Mellon'}),
+				campus.create({name : 'Binghamton'}),
+				student.create({name : 'Jessica'}),
+				student.create({name : 'Qian'}),
+				student.create({name : 'Rice'})
+			])
+				.then(([c1,c2,s1,s2,s3])=> {
+					s1.setCampus(c1)
+					console.log('db synced and seeded')
+					app.listen(PORT, () => console.log(`server listening on port ${PORT}`))
+				})
   });
 }

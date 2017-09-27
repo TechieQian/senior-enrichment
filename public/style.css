@@ -1,0 +1,12 @@
+tr:hover{
+ background:cyan;
+}
+
+table{
+    table-layout: fixed;
+    width: 400px;
+}
+
+th, td {
+    width: 250px;
+}

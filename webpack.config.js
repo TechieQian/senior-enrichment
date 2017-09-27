@@ -19,8 +19,8 @@ module.exports = {
         test: /jsx?$/,
         include: resolve(__dirname, './app'),
         loader: 'babel-loader',
-        query: {
-          presets: ['react', 'es2015']
+				query: {
+          presets: ['react', 'es2015', 'stage-2']
         }
       }
     ]
