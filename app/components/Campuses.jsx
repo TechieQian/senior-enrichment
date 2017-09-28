@@ -1,12 +1,13 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {fetchCampuses} from '../store.jsx'
+import {fetchStudents, fetchCampuses} from '../store.jsx'
 import { Link  } from 'react-router-dom'
 import CampusForm from './CampusForm'
 
 class Campuses extends Component {
 
 	componentDidMount() {
+		this.props.getStudents()
 		this.props.getCampuses()
 	}
 
@@ -16,21 +17,27 @@ class Campuses extends Component {
 				<div className='row'>
 					{
 						this.props.campuses.map((campus)=> {
+							const students = this.props.students.filter((student)=> {
+								return student.campus && student.campus.id == campus.id
+							})
 							return (
-								<div className='well col-sm-3' >
-									<Link className='thumbnail' to={`/campus/${campus.id}`} >
-										<div className="caption">
+								<div className='panel panel-primary col-sm-3' >
+									<div className='panel-body'>
+										<Link to={{
+											pathname : 	`/campus/${campus.id}`,
+											state : { campus, students }
+											}}>
 											<h5>
 												<span>{ campus.name }</span>
 											</h5>
-										</div>
-									</Link>
+										</Link>
+									</div>
 								</div>
 							)
 						})
 					}
 				</div>
-				<div>
+				<div className='row'>
 					<CampusForm />
 				</div>
 			</div>
@@ -39,14 +46,16 @@ class Campuses extends Component {
 
 }
 
-const mapStateToProps = ({campuses})=> {
+const mapStateToProps = ({students,campuses})=> {
 	return {
+		students,
 		campuses
 	}
 }
 
 const mapDispatchToProps = (dispatch) => {
 	return {
+		getStudents : ()=> {dispatch(fetchStudents())},
 		getCampuses : ()=> { dispatch(fetchCampuses()) }
 	}
 }

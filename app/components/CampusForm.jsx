@@ -1,41 +1,32 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import store, {putCampus, postCampus} from '../store.jsx'
+import {putCampus, postCampus} from '../store.jsx'
 
 class CampusForm extends Component {
 
 	constructor() {
 		super()
 		this.state = {
-			campusName : '',
-			image : ''
+			campusName : ''
 		}
 		this.handleChange = this.handleChange.bind(this)
 		this.handleSubmit = this.handleSubmit.bind(this)
 	}
 
 	componentDidMount() {
-		console.log('i mounted',this.props.campus)
-		if(this.props.campus) {
-			const {name, image} = this.props.campus
-			console.log('setting campus state', name)
+		if(this.props.campus && this.props.campus.id) {
+			const {name} = this.props.campus
 			this.setState({
-				campusName : name,
-				image
+				campusName : name
 			})
-		}
-		else {
-			console.log('no campus')
 		}
 	}
 
 	componentWillReceiveProps(props) {
 		if(props.campus) {
-			const {name,image} = props.campus
-			console.log('received props')
+			const {name} = props.campus
 			this.setState({
-				campusName : name,
-				image
+				campusName : name
 			})
 		}
 	}
@@ -46,25 +37,27 @@ class CampusForm extends Component {
 
 	handleSubmit(event) {
 		event.preventDefault()
-		const { campusName, image } = this.state
+		const { campusName } = this.state
 		let newCampus
-		console.log('before state', store.getState())
 		if (this.props.campus) {
-			newCampus = Object.assign(this.props.campus, {name : campusName,image})
+			newCampus = Object.assign(this.props.campus, {name : campusName})
 			this.props.editCampus(newCampus)
 		}
 		else {
-			newCampus = {name : campusName, image}
+			newCampus = {name : campusName}
 			this.props.createCampus(newCampus)
 		}
 
 	}
 
 	render() {
-		console.log('form rendering', this.props.campus)
-		console.log('state', this.state)
 		return (
-			<div className='col-sm-3 panel-body'>
+			<div className='col-sm-3'>
+			<div className='panel panel-primary'>
+				<div className='panel-heading'>
+					{this.props.campus ? 'Edit Campus' : 'New Campus'}
+				</div>
+				<div className='panel-body'>
 				<form onSubmit={this.handleSubmit}>
 					<div className='form-group'>
 						<label>Name</label>
@@ -81,7 +74,9 @@ class CampusForm extends Component {
 								className="btn btn-primary btn-block"
 							>Save</button>
 						</div>					
-				</form>
+					</form>
+				</div>
+			</div>
 			</div>
 		)
 	}

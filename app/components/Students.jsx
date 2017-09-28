@@ -1,8 +1,8 @@
 import React, {Component} from 'react'
 import {connect} from 'react-redux'
-import {putStudent, fetchCampuses,fetchStudents, removeStudent, fetchStudentById, postStudent} from '../store.jsx'
+import {putStudent, fetchCampuses, fetchStudents, removeStudent, postStudent} from '../store.jsx'
 import {Link} from 'react-router-dom'
-import Student from './Student'
+import StudentForm from './StudentForm'
 
 
 class Students extends Component {
@@ -11,7 +11,8 @@ class Students extends Component {
 		super()
 		this.state = {
 			showNew : false,
-			showEdit : false
+			showEdit : false,
+			student : {}
 		}
 		this.handleSubmit = this.handleSubmit.bind(this)
 	}
@@ -23,7 +24,7 @@ class Students extends Component {
 
 	handleSubmit(student) {
 		this.setState( { showNew : false, showEdit : false } )
-		if ( student.id ) {
+		if (student.id) {
 			this.props.updateStudent(student)
 		}
 		else {
@@ -37,13 +38,13 @@ class Students extends Component {
 			<div>
 				<div className='row'> 
 					{ this.state.showEdit && 
-							<Student 
-								student={this.props.selectedStudent} 
+							<StudentForm
+								student={this.state.student} 
 								campuses={this.props.campuses} 
 								handleSubmit={this.handleSubmit}
 							/>}
 					{ this.state.showNew &&	
-							<Student 
+							<StudentForm 
 								campuses={ this.props.campuses } 
 								handleSubmit={this.handleSubmit}
 							/>	}
@@ -63,8 +64,11 @@ class Students extends Component {
 						<tbody>
 						{
 							this.props.students.map((student)=> 
-								<tr key={student.id} onClick={()=> {this.props.getSelectedStudent(student.id)
-								this.setState({ showEdit : true, showNew : false })}}>
+								<tr key={student.id} onClick={()=> {
+									this.setState({student})
+									this.setState({ showEdit : true, showNew : false })
+								}} 
+								> 
 									<td>{student.id}</td>
 									<td>{student.name}</td>
 									<td>{student.campus && student.campus.name}</td>
@@ -87,10 +91,9 @@ class Students extends Component {
 	}
 }
 
-const mapStateToProps = ({campuses,selectedStudent, students})=> {
+const mapStateToProps = ({campuses, students})=> {
 	return {
 		students,
-		selectedStudent,
 		campuses
 	}
 }
@@ -100,7 +103,6 @@ const mapDispatchToProps = (dispatch)=> {
 		getCampuses : ()=> {dispatch(fetchCampuses())},
 		deleteStudent : (id)=> { dispatch(removeStudent(id)) },
 		getStudents : ()=> {dispatch(fetchStudents())},
-		getSelectedStudent : (id)=> {dispatch(fetchStudentById(id))},
 		updateStudent : (student)=> {dispatch(putStudent(student))},
 		createStudent : (student)=> {dispatch(postStudent(student))}
 	}

@@ -1,0 +1,205 @@
+import { combineReducers } from 'redux'
+import axios from 'axios';
+
+
+const initialState = {
+	campus 					: {},
+	students 				: [],
+	campuses 				: [],
+	selectedStudent : {}
+}
+
+//ACTION TYPES
+
+const 
+	GET_STUDENTS 		= 'GET_STUDENTS',
+	GET_STUDENT 		= 'GET_STUDENT',
+	GET_CAMPUSES 		= 'GET_CAMPUSES',
+	GET_CAMPUS 			= 'GET_CAMPUS',
+	CREATE_STUDENT  = 'CREATE_STUDENT',
+	DELETE_STUDENT	=	'DELETE_STUDENT',
+	EDIT_CAMPUS    = 'EDIT_CAMPUS'
+	
+//ACTION CREATORS
+
+const getStudents = students => {
+	const action = { type : GET_STUDENTS, students }
+	return action;
+}
+
+const getStudent = student=> {
+	const action = { type : GET_STUDENT, student }
+	return action;
+}
+
+const getCampuses = campuses => {
+	const action = { type : GET_CAMPUSES, campuses }
+	return action
+}
+
+const getCampus = campus => {
+	const action = { type : GET_CAMPUS, campus }
+	return action
+}
+
+const deleteStudent = studentId => {
+	const action = { type : DELETE_STUDENT, studentId }
+	return action
+}
+
+const createStudent = student => {
+	const action = { type : CREATE_STUDENT, student }
+	return action
+}
+
+const editCampus = campus => {
+	const action = { type : EDIT_CAMPUS, campus }
+	return action
+}
+
+//THUNK CREATORS
+
+
+export function fetchStudents () {
+  return function thunk (dispatch) {
+    return axios.get('/api/students')
+      .then(res => res.data)
+			.then(students => {
+        const action = getStudents(students);
+        dispatch(action);
+      });
+  }
+}
+
+export function fetchStudentById(id) {
+	return function thunk (dispatch) {
+		return axios.get(`/api/students/${id}`)
+			.then(res => res.data)
+			.then(student=> {
+				console.log('got student', student)
+				const action = getStudent(student)
+				dispatch(action)
+			})
+	}
+}
+
+export function fetchCampusById(id) {
+	return function thunk (dispatch) {
+		return axios.get(`/api/campuses/${id}`)
+			.then(res => res.data)
+			.then(campus=> {
+				console.log(`got single campus ${campus.name}`)
+				const action = getCampus(campus)
+				dispatch(action)
+			})
+	}
+}
+
+export function fetchCampuses () {
+	console.log('fetch campus called')
+  return function thunk (dispatch) {
+		return axios.get('/api/campuses')
+			.then(res => res.data)
+			.then(campuses => {
+        const action = getCampuses(campuses);
+        dispatch(action);
+			})
+  }
+}
+
+export function removeStudent (studentId) {
+	return function thunk (dispatch) {
+		console.log('remove ran', studentId)
+		return axios.delete(`api/students/${studentId}`)
+			.then(() => {
+				const action = deleteStudent(studentId);
+				console.log('delete success')
+        dispatch(action);
+			})
+  }
+}
+
+export function putStudent (student) {
+	return function thunk (dispatch) {
+		return axios.put(`api/students/${student.id}`, student)
+			.then(() => {
+				const action = fetchStudents();
+				console.log('update success')
+        dispatch(action);
+			})
+  }
+}
+
+export function putCampus (campus) {
+	return function thunk (dispatch) {
+		return axios.put(`api/campuses/${campus.id}`, campus)
+			.then(() => {
+			})
+  }
+}
+
+export function postStudent (student) {
+	return function thunk (dispatch) {
+		return axios.post(`api/students/`, student)
+			.then(res => res.data )
+			.then((student) => {
+				console.log('created student', student)
+				const action = fetchStudents();
+        dispatch(action);
+			})
+  }
+}
+
+export function postCampus (campus) {
+	return function thunk (dispatch) {
+		return axios.post(`api/campuses/`, campus)
+			.then(res => res.data )
+			.then((campus) => {
+				console.log('created campus', campus)
+				const action = fetchCampuses();
+        dispatch(action);
+			})
+  }
+}
+
+const rootReducer = function(state = initialState, action) {
+	console.log('reducer time', state, action)
+	switch(action.type) {
+    case GET_CAMPUSES:
+      return {
+        ...state,
+        campuses: action.campuses
+			};
+		case GET_CAMPUS:
+			console.log('GET CAMPUS BEFORE', state)
+			return {
+				...state,
+				campus:	action.campus
+			};
+    case GET_STUDENTS:
+      return {
+        ...state,
+        students: action.students
+			};
+    case GET_STUDENT:
+      return {
+        ...state,
+        selectedStudent: action.student
+			};
+    case CREATE_STUDENT:
+      return {
+        ...state,
+        students: [...state.students, action.student] 
+			};
+		case DELETE_STUDENT:
+      return {
+        ...state,
+				students: [...state.students].filter((student)=> {return student.id != action.studentId})
+			};
+		case EDIT_CAMPUS:
+			return state
+    default: return state
+  }
+};
+
+export default rootReducer
